@@ -1,0 +1,14 @@
+{
+  "name": "go1/edge",
+  "license": "MIT",
+  "prefer-stable": true,
+  "minimum-stability": "stable",
+  "require": {
+    "doctrine/dbal": "^2.5.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "go1\\edge\\": "./"
+    }
+  }
+}
