@@ -4,6 +4,7 @@ namespace go1\edge;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\DBAL\Schema\Schema;
 use PDO;
 
 class Edge
@@ -21,8 +22,24 @@ class Edge
 
     public function install($execute = true)
     {
-        $schema = $this->connection->getSchemaManager()->createSchema();
-        $table = $schema->createTable($this->tableName);
+
+        static::migrate(
+            $schema = $this->connection->getSchemaManager()->createSchema(),
+            $this->tableName
+        );
+
+        if ($execute) {
+            foreach ($schema->toSql($this->connection->getDatabasePlatform()) as $sql) {
+                $this->connection->executeQuery($sql);
+            }
+        }
+
+        return $schema;
+    }
+
+    public static function migrate(Schema $schema, $tableName)
+    {
+        $table = $schema->createTable($tableName);
         $table->addColumn('id', 'integer', ['unsigned' => true, 'autoincrement' => true]);
         $table->addColumn('type', 'integer');
         $table->addColumn('source_id', 'integer');
@@ -33,14 +50,6 @@ class Edge
         $table->addIndex(['type', 'target_id'], 'index_target');
         $table->addIndex(['weight'], 'index_weight');
         $table->addUniqueIndex(['type', 'source_id', 'target_id'], 'unique_relationship');
-
-        if ($execute) {
-            foreach ($schema->toSql($this->connection->getDatabasePlatform()) as $sql) {
-                $this->connection->executeQuery($sql);
-            }
-        }
-
-        return $schema;
     }
 
     private function claimType($type)
