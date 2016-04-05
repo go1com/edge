@@ -22,7 +22,6 @@ class Edge
 
     public function install($execute = true)
     {
-
         static::migrate(
             $schema = $this->connection->getSchemaManager()->createSchema(),
             $this->tableName
@@ -45,10 +44,12 @@ class Edge
         $table->addColumn('source_id', 'integer');
         $table->addColumn('target_id', 'integer');
         $table->addColumn('weight', 'integer');
+        $table->addColumn('timestamp', 'integer', ['unsigned' => true]);
         $table->setPrimaryKey(['id']);
         $table->addIndex(['type', 'source_id'], 'index_source');
         $table->addIndex(['type', 'target_id'], 'index_target');
         $table->addIndex(['weight'], 'index_weight');
+        $table->addIndex(['timestamp'], 'index_timestamp');
         $table->addUniqueIndex(['type', 'source_id', 'target_id'], 'unique_relationship');
     }
 
