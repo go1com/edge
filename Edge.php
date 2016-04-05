@@ -68,7 +68,7 @@ class Edge
     {
         $type = $this->claimType($type);
         $key = ['type' => $type, 'source_id' => $sourceId, 'target_id' => $targetId];
-        $ro = $key + ['weight' => $weight];
+        $ro = $key + ['weight' => $weight, 'timestamp' => time()];
 
         try {
             $this->connection->insert($this->tableName, $ro);
@@ -84,7 +84,11 @@ class Edge
                 )
                 ->fetchColumn();
 
-            $this->connection->update($this->tableName, ['weight' => $weight], ['id' => $id]);
+            $this->connection->update(
+                $this->tableName,
+                ['weight' => $weight, 'timestamp' => time()],
+                ['id' => $id]
+            );
 
             return $id;
         }
