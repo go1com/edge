@@ -4,7 +4,8 @@
   "prefer-stable": true,
   "minimum-stability": "stable",
   "require": {
-    "doctrine/dbal": "^2.5.4"
+    "doctrine/dbal": "^2.5.4",
+    "symfony/event-dispatcher": "^v3.0.0|^2.7.0"
   },
   "autoload": {
     "psr-4": {
