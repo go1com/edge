@@ -6,18 +6,28 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\DBAL\Schema\Schema;
 use PDO;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class Edge
 {
     private $connection;
     private $tableName = 'edge';
     private $defaultType;
+    private $dispatcher;
 
-    public function __construct(Connection $connection, $tableName = 'edge', $defaultType = null)
+    const EVENT_LINK_DUPLICATE = 'edge.link.duplicate';
+
+    public function __construct(
+        Connection $connection,
+        $tableName = 'edge',
+        $defaultType = null,
+        EventDispatcherInterface $dispatcher = null
+    )
     {
         $this->connection = $connection;
         $this->tableName = $tableName;
         $this->defaultType = $defaultType;
+        $this->dispatcher = $dispatcher;
     }
 
     public function install($execute = true)
@@ -76,19 +86,23 @@ class Edge
             return $this->connection->lastInsertId($this->tableName);
         }
         catch (UniqueConstraintViolationException $e) {
-            $id = $this
-                ->connection
-                ->executeQuery(
-                    "SELECT id FROM {$this->tableName} WHERE type = ? AND source_id = ? AND target_id = ?",
-                    [$type, $sourceId, $targetId]
-                )
-                ->fetchColumn();
+            // Reload current one, override weight & timestamp.
+            $arguments = ['timestamp' => time()] + $this
+                    ->connection
+                    ->executeQuery(
+                        "SELECT * FROM {$this->tableName} WHERE type = ? AND source_id = ? AND target_id = ?",
+                        [$type, $sourceId, $targetId]
+                    )
+                    ->fetch();
 
-            $this->connection->update(
-                $this->tableName,
-                ['weight' => $weight, 'timestamp' => time()],
-                ['id' => $id]
-            );
+            // Allow hacking weight by sending non-numeric value.
+            if (is_numeric($weight)) {
+                $arguments['weight'] = $weight;
+            }
+
+            $id = $arguments['id'];
+            $this->dispatcher->dispatch(static::EVENT_LINK_DUPLICATE, $event = new EdgeEvent($this, $arguments));
+            $this->connection->update($this->tableName, $event->getArguments(), ['id' => $id]);
 
             return $id;
         }
