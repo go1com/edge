@@ -4,9 +4,9 @@ namespace go1\edge;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class EdgeTest extends PHPUnit_Framework_TestCase
+class EdgeTest extends TestCase
 {
     /** @var  Connection */
     private $connection;

@@ -1,12 +1,14 @@
 {
   "name": "go1/edge",
-  "license": "MIT",
   "prefer-stable": true,
   "minimum-stability": "stable",
   "require": {
     "doctrine/dbal": "^2.5.4",
     "symfony/event-dispatcher": "^v3.0.0|^2.7.0"
   },
+  "license" : [
+    "MIT"
+  ],
   "autoload": {
     "psr-4": {
       "go1\\edge\\": "./"
