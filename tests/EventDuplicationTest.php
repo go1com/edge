@@ -4,10 +4,10 @@ namespace go1\edge;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class EventDuplicationTest extends PHPUnit_Framework_TestCase
+class EventDuplicationTest extends TestCase
 {
     public function testEvent()
     {
